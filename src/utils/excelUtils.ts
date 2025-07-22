@@ -173,7 +173,7 @@ export function parseStudentsFromExcel(file: File, availableDepartments: any[] =
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        const students = jsonData.map((row: any) => {
+        const students = jsonData.map((row: any, index: number) => {
           // Convert UG percentage from 100 scale to 10 scale
           const rawUGValue = Number(row['UG Percentage'] || row['UG CGPA'] || row['ug_percentage'] || row['ugPercentage'] || row['CGPA'] || row['cgpa'] || 0);
           const ugPercentage = convertUGPercentageToScale10(rawUGValue);
@@ -186,7 +186,7 @@ export function parseStudentsFromExcel(file: File, availableDepartments: any[] =
           const twelfthPercentage = Number(row['12th Percentage'] || row['12th %'] || row['HSC'] || row['Intermediate'] || row['twelfth_percentage'] || 0);
 
           // Generate fallback values for required fields
-          const rollNumberRaw = row['REG NO'] || row['Roll Number'] || row['roll_number'] || row['Student ID'] || row['ID'];
+          const rollNumberRaw = row['REG NO'] || row['Roll Number'] || row['Roll Number'] || row['roll_number'] || row['Student ID'] || row['ID'];
           const rollNumber = (rollNumberRaw && String(rollNumberRaw).trim()) || `STUDENT_${Date.now()}_${index}`;
           
           const studentNameRaw = row['NAME'] || row['Student Name'] || row['student_name'] || row['Name'] || row['Full Name'];
@@ -198,16 +198,16 @@ export function parseStudentsFromExcel(file: File, availableDepartments: any[] =
           const mobileNumberRaw = row['MOBILE NUMBER'] || row['Mobile Number'] || row['Phone'] || row['mobile_number'];
           const mobileNumber = (mobileNumberRaw && String(mobileNumberRaw).trim()) || '0000000000';
           
-          const department = mapDepartmentName(String(row['Department'] || row['department'] || ''), availableDepartments) || 'Computer Science';
+          const departmentRaw = row['DEPARTMENT'] || row['Department'] || row['department'] || row['Dept'];
+          const department = mapDepartmentName(departmentRaw ? String(departmentRaw).trim() : '', availableDepartments);
           
           const sectionRaw = row['Section'] || row['section'];
           const section = (sectionRaw && String(sectionRaw).trim()) || 'A';
           
           const mentorIdRaw = row['Mentor ID'] || row['mentor_id'];
-          const mentorId = (mentorIdRaw && String(mentorIdRaw).trim()) || availableDepartments[0]?.mentors?.[0]?.id || 'DEFAULT_MENTOR';
+          const mentorId = (mentorIdRaw && String(mentorIdRaw).trim()) || 'mentor_1_1';
           
           const student = {
-            id: rollNumber,
             roll_number: rollNumber,
             student_name: studentName,
             email: email,
@@ -215,12 +215,16 @@ export function parseStudentsFromExcel(file: File, availableDepartments: any[] =
             mobile_number: mobileNumber,
             department: department,
             section: section,
-            gender: row['GENDER'] || row['Gender'] || row['Sex'] || row['gender'] || null,
+            gender: (row['GENDER'] || row['Gender'] || row['Sex'] || row['gender']) ? String(row['GENDER'] || row['Gender'] || row['Sex'] || row['gender']).trim() : null,
             date_of_birth: convertExcelDateToString(row['DOB'] || row['Date of Birth'] || row['Birth Date'] || row['date_of_birth']),
             number_of_backlogs: Number(row['NO OF BACKLOG'] || row['Number of Backlogs'] || row['Backlogs'] || row['number_of_backlogs'] || 0),
-            resume_link: row['RESUME LINK'] || row['Resume Link'] || row['CV Link'] || row['resume_link'] || null,
-            photo_url: row['pHoto'] || row['Photo URL'] || row['Photo Link'] || row['Image URL'] || row['photo_url'] || null,
+            resume_link: (row['RESUME LINK'] || row['Resume Link'] || row['CV Link'] || row['resume_link']) ? String(row['RESUME LINK'] || row['Resume Link'] || row['CV Link'] || row['resume_link']).trim() : null,
+            photo_url: (row['pHoto'] || row['Photo URL'] || row['Photo Link'] || row['Image URL'] || row['photo_url']) ? String(row['pHoto'] || row['Photo URL'] || row['Photo Link'] || row['Image URL'] || row['photo_url']).trim() : null,
             mentor_id: mentorId,
+            tenth_percentage: tenthPercentage,
+            twelfth_percentage: twelfthPercentage,
+            ug_percentage: ugPercentage,
+            cgpa: cgpa,
             academicDetails: {
               tenthPercentage: tenthPercentage,
               twelfthPercentage: twelfthPercentage,
