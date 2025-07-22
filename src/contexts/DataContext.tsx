@@ -124,7 +124,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       setError(null);
 
-      // Fetch students with their placement records
       const { data: studentsData, error: studentsError } = await supabase
         .from('students')
         .select('*');
@@ -137,7 +136,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (placementError) throw placementError;
 
-      // Convert and combine data
       const convertedStudents = studentsData.map(dbStudent => {
         const placementRecord = placementData.find(p => p.student_id === dbStudent.id);
         return convertDatabaseStudent(dbStudent, placementRecord);
@@ -157,10 +155,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    // Apply filters whenever filters, students, user, or showMyStudentsOnly changes
     let filtered = [...students];
 
-    // Filter out students from inactive departments unless explicitly showing them
     if (!showInactiveDepartments) {
       const activeDepartmentNames = activeDepartments.map(dept => dept.name);
       filtered = filtered.filter(student => 
@@ -168,12 +164,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
     }
 
-    // First apply mentor filter if showMyStudentsOnly is true
     if (user?.role === 'mentor' && showMyStudentsOnly) {
       filtered = filtered.filter(student => student.mentorId === user.id);
     }
 
-    // Then apply all other filters
     if (filters.department) {
       filtered = filtered.filter(student => 
         student.department.toLowerCase().includes(filters.department.toLowerCase())
@@ -243,7 +237,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setError(null);
       const dbStudent = convertToDatabase(studentData);
-      
       const { data, error } = await supabase
         .from('students')
         .insert([dbStudent])
@@ -264,10 +257,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateStudent = async (id: string, updatedStudent: Partial<Student>) => {
     try {
       setError(null);
-      
-      // Convert partial student data to database format
+
       const updateData: any = {};
-      
+
       if (updatedStudent.rollNumber) updateData.roll_number = updatedStudent.rollNumber;
       if (updatedStudent.studentName) updateData.student_name = updatedStudent.studentName;
       if (updatedStudent.email) updateData.email = updatedStudent.email;
@@ -282,7 +274,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (updatedStudent.photoUrl !== undefined) updateData.photo_url = updatedStudent.photoUrl;
       if (updatedStudent.mentorId) updateData.mentor_id = updatedStudent.mentorId;
       if (updatedStudent.status) updateData.status = updatedStudent.status;
-      
+
       if (updatedStudent.academicDetails) {
         if (updatedStudent.academicDetails.tenthPercentage !== undefined) {
           updateData.tenth_percentage = updatedStudent.academicDetails.tenthPercentage;
@@ -307,7 +299,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error;
 
-      // Get placement record if exists
       const { data: placementData } = await supabase
         .from('placement_records')
         .select('*')
@@ -315,7 +306,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       const updatedStudentData = convertDatabaseStudent(data, placementData);
-      setStudents(prev => prev.map(student => 
+      setStudents(prev => prev.map(student =>
         student.id === id ? updatedStudentData : student
       ));
     } catch (err) {
@@ -328,14 +319,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteStudent = async (id: string) => {
     try {
       setError(null);
-      
       const { error } = await supabase
         .from('students')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
-
       setStudents(prev => prev.filter(student => student.id !== id));
     } catch (err) {
       console.error('Error deleting student:', err);
@@ -347,7 +336,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addPlacementRecord = async (studentId: string, recordData: Omit<PlacementRecord, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
       setError(null);
-      
       const { data, error } = await supabase
         .from('placement_records')
         .insert([{
@@ -361,13 +349,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error;
 
-      // Update student status to placed
       await supabase
         .from('students')
         .update({ status: 'placed' })
         .eq('id', studentId);
 
-      // Reload students to get updated data
       await loadStudents();
     } catch (err) {
       console.error('Error adding placement record:', err);
@@ -379,7 +365,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updatePlacementRecord = async (studentId: string, updatedRecord: Partial<PlacementRecord>) => {
     try {
       setError(null);
-      
       const updateData: any = {};
       if (updatedRecord.company) updateData.company = updatedRecord.company;
       if (updatedRecord.package) updateData.package = updatedRecord.package;
@@ -392,7 +377,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error;
 
-      // Reload students to get updated data
       await loadStudents();
     } catch (err) {
       console.error('Error updating placement record:', err);
@@ -401,12 +385,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // ✅ FIXED FUNCTION: Skips students with missing roll numbers
   const importStudents = async (newStudents: Student[]) => {
     try {
       setError(null);
-      
-      const dbStudents = newStudents.map(student => convertToDatabase(student));
-      
+
+      const validStudents = newStudents.filter(student =>
+        student.rollNumber && student.rollNumber.trim() !== ''
+      );
+
+      const skipped = newStudents.length - validStudents.length;
+      if (skipped > 0) {
+        console.warn(`Skipped ${skipped} students with missing roll numbers`);
+      }
+
+      const dbStudents = validStudents.map(student => convertToDatabase(student));
+
       const { data, error } = await supabase
         .from('students')
         .upsert(dbStudents, { onConflict: 'roll_number' })
@@ -414,7 +408,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error;
 
-      // Reload students to get updated data
       await loadStudents();
     } catch (err) {
       console.error('Error importing students:', err);
