@@ -20,7 +20,7 @@ import {
   getDepartmentStats,
   getMonthlyPlacements,
   getCompanyWiseData,
-  getPackageDistributio
+  getPackageDistribution,
   getStatusDistribution,
 } from '../utils/chartUtils';
 import { Student } from '../types';
