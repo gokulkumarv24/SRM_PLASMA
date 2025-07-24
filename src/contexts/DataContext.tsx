@@ -7,7 +7,7 @@ import { supabase, DatabaseStudent, DatabasePlacementRecord } from '../lib/supab
 
 interface DataContextType {
   students: Student[];
-  filteredStudents: Student[
+  filteredStudents: Student[];
   filters: FilterOptions;
   setFilters: (filters: FilterOptions) => void;
   addStudent: (student: Omit<Student, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
