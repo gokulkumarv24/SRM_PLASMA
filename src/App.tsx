@@ -9,7 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
-    <EnvironmentProvid
+    <EnvironmentProvider>
       <AuthProvider>
         <DataProvider>
           <div className="min-h-screen bg-gray-50">
