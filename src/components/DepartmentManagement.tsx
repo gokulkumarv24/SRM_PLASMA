@@ -21,7 +21,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, onSa
   });
 
   React.useEffect(() => {
-    if (department) {
+    if (department)
       setFormData({
         name: department.name,
         code: department.code,
