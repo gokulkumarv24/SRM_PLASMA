@@ -11,7 +11,7 @@ import {
   Pie,
   Cell,
   LineChart,
-  Line,
+  Lin
 } from 'recharts';
 import { ChartData, DepartmentStats, MonthlyPlacement } from '../types';
 
