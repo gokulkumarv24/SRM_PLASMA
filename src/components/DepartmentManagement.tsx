@@ -9,7 +9,7 @@ interface DepartmentModalProps {
   onClose: () => void;
   onSave: (department: Omit<Department, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   department?: Department | null;
-  isLoading?: boolean
+  isLoading?: boolean;
 }
 
 const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, onSave, department, isLoading }) => {
