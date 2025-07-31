@@ -10,7 +10,7 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart
+  LineChart,
   Line,
 } from 'recharts';
 import { ChartData, DepartmentStats, MonthlyPlacement } from '../types';
