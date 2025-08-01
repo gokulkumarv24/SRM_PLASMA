@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import { Student } from '../types';
 
 // Helper function to export data to CSV
 export function exportToCSV(data: any[], filename: string = 'export.csv'): void {
@@ -161,7 +162,7 @@ function determineEligibility(tenthPercentage: number, twelfthPercentage: number
   return 'ineligible';
 }
 
-export function parseStudentsFromExcel(file: File, availableDepartments: any[] = []): Promise<any[]> {
+export function parseStudentsFromExcel(file: File, availableDepartments: any[] = []): Promise<Student[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
@@ -173,7 +174,7 @@ export function parseStudentsFromExcel(file: File, availableDepartments: any[] =
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        const students = jsonData.map((row: any, index: number) => {
+        const students: Student[] = jsonData.map((row: any, index: number) => {
           // Convert UG percentage from 100 scale to 10 scale
           const rawUGValue = Number(row['UG Percentage'] || row['UG CGPA'] || row['ug_percentage'] || row['ugPercentage'] || row['CGPA'] || row['cgpa'] || 0);
           const ugPercentage = convertUGPercentageToScale10(rawUGValue);
@@ -207,24 +208,21 @@ export function parseStudentsFromExcel(file: File, availableDepartments: any[] =
           const mentorIdRaw = row['Mentor ID'] || row['mentor_id'];
           const mentorId = (mentorIdRaw && String(mentorIdRaw).trim()) || 'mentor_1_1';
           
-          const student = {
-            roll_number: rollNumber,
-            student_name: studentName,
+          const student: Student = {
+            id: `temp_${Date.now()}_${index}`, // Temporary ID, will be replaced by database
+            rollNumber: rollNumber,
+            studentName: studentName,
             email: email,
-            personal_email: row['PERSONAL  MAIL ID'] || row['Personal Email'] || row['personal_email'] || null,
-            mobile_number: mobileNumber,
+            personalEmail: row['PERSONAL  MAIL ID'] || row['Personal Email'] || row['personal_email'] || undefined,
+            mobileNumber: mobileNumber,
             department: department,
             section: section,
-            gender: (row['GENDER'] || row['Gender'] || row['Sex'] || row['gender']) ? String(row['GENDER'] || row['Gender'] || row['Sex'] || row['gender']).trim() : null,
-            date_of_birth: convertExcelDateToString(row['DOB'] || row['Date of Birth'] || row['Birth Date'] || row['date_of_birth']),
-            number_of_backlogs: Number(row['NO OF BACKLOG'] || row['Number of Backlogs'] || row['Backlogs'] || row['number_of_backlogs'] || 0),
-            resume_link: (row['RESUME LINK'] || row['Resume Link'] || row['CV Link'] || row['resume_link']) ? String(row['RESUME LINK'] || row['Resume Link'] || row['CV Link'] || row['resume_link']).trim() : null,
-            photo_url: (row['pHoto'] || row['Photo URL'] || row['Photo Link'] || row['Image URL'] || row['photo_url']) ? String(row['pHoto'] || row['Photo URL'] || row['Photo Link'] || row['Image URL'] || row['photo_url']).trim() : null,
-            mentor_id: mentorId,
-            tenth_percentage: tenthPercentage,
-            twelfth_percentage: twelfthPercentage,
-            ug_percentage: ugPercentage,
-            cgpa: cgpa,
+            gender: (row['GENDER'] || row['Gender'] || row['Sex'] || row['gender']) ? String(row['GENDER'] || row['Gender'] || row['Sex'] || row['gender']).trim() as 'Male' | 'Female' | 'Other' : undefined,
+            dateOfBirth: convertExcelDateToString(row['DOB'] || row['Date of Birth'] || row['Birth Date'] || row['date_of_birth']) || undefined,
+            numberOfBacklogs: Number(row['NO OF BACKLOG'] || row['Number of Backlogs'] || row['Backlogs'] || row['number_of_backlogs'] || 0),
+            resumeLink: (row['RESUME LINK'] || row['Resume Link'] || row['CV Link'] || row['resume_link']) ? String(row['RESUME LINK'] || row['Resume Link'] || row['CV Link'] || row['resume_link']).trim() : undefined,
+            photoUrl: (row['pHoto'] || row['Photo URL'] || row['Photo Link'] || row['Image URL'] || row['photo_url']) ? String(row['pHoto'] || row['Photo URL'] || row['Photo Link'] || row['Image URL'] || row['photo_url']).trim() : undefined,
+            mentorId: mentorId,
             academicDetails: {
               tenthPercentage: tenthPercentage,
               twelfthPercentage: twelfthPercentage,

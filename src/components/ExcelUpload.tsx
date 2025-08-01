@@ -22,21 +22,29 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onUpload }) => {
 
     setIsUploading(true);
     setUploadStatus('idle');
+    setUploadMessage('Processing Excel file...');
 
     try {
       const students = await parseStudentsFromExcel(file, activeDepartments);
+      
+      if (students.length === 0) {
+        throw new Error('No valid student records found in the Excel file.');
+      }
+      
+      setUploadMessage(`Parsed ${students.length} students. Saving to database...`);
       onUpload(students);
       setUploadedCount(students.length);
       setUploadStatus('success');
       setUploadMessage(`Successfully imported ${students.length} student records`);
     } catch (error) {
       setUploadStatus('error');
-      setUploadMessage('Failed to parse Excel file. Please check the format and try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setUploadMessage(`Failed to import Excel file: ${errorMessage}`);
       console.error('Excel import error:', error);
     } finally {
       setIsUploading(false);
     }
-  }, [onUpload]);
+  }, [onUpload, activeDepartments]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -77,19 +85,24 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onUpload }) => {
         
         <div className="flex flex-col items-center space-y-4">
           {isUploading ? (
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+            <>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+              <p className="text-sm text-gray-600">{uploadMessage}</p>
+            </>
           ) : (
             <FileSpreadsheet className="h-12 w-12 text-gray-400" />
           )}
           
-          <div>
-            <p className="text-lg font-medium text-gray-900">
-              {isDragActive ? 'Drop the file here' : 'Drag & drop Excel file here'}
-            </p>
-            <p className="text-sm text-gray-500 mt-1">
-              or click to select file (.xlsx, .xls, .csv)
-            </p>
-          </div>
+          {!isUploading && (
+            <div>
+              <p className="text-lg font-medium text-gray-900">
+                {isDragActive ? 'Drop the file here' : 'Drag & drop Excel file here'}
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                or click to select file (.xlsx, .xls, .csv)
+              </p>
+            </div>
+          )}
           
           {!isUploading && (
             <button className="btn-primary">

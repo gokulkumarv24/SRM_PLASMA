@@ -389,6 +389,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const importStudents = async (newStudents: Student[]) => {
     try {
       setError(null);
+      setIsLoading(true);
 
       const validStudents = newStudents.filter(student =>
         student.rollNumber && student.rollNumber.trim() !== ''
@@ -397,6 +398,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const skipped = newStudents.length - validStudents.length;
       if (skipped > 0) {
         console.warn(`Skipped ${skipped} students with missing roll numbers`);
+      }
+
+      if (validStudents.length === 0) {
+        throw new Error('No valid students found to import. Please check your Excel file format.');
       }
 
       const dbStudents = validStudents.map(student => convertToDatabase(student));
@@ -409,10 +414,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
 
       await loadStudents();
+      
+      // Show success message
+      console.log(`Successfully imported ${validStudents.length} students to database`);
     } catch (err) {
       console.error('Error importing students:', err);
       setError('Failed to import students. Please try again.');
       throw err;
+    } finally {
+      setIsLoading(false);
     }
   };
 
