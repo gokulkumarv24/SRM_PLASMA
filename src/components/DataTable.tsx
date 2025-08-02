@@ -8,7 +8,7 @@ interface DataTableProps {
   data: Student[];
   onEdit: (student: Student) => void;
   onDelete: (id: string) => void;
-  onAddPlacement: (student: Student) => void
+  onAddPlacement: (student: Student) => void;
 }
 
 type SortField = keyof Student | 'company' | 'package' | 'placementDate';
