@@ -4,7 +4,7 @@ import {
   Bar,
   XAxis,
   YAxis,
-  CartesianGrid
+  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   PieChart,
