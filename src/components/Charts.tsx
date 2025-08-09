@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   BarChart,
-  Bar
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
