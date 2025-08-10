@@ -499,7 +499,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, onEdit, onDelete, onAddPlac
                 <button
                   onClick={() => setViewingStudent(null)}
                   className="btn-secondary"
-                >
+                
                   Close
                 </button>
               </div>
