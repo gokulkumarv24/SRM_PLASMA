@@ -7,7 +7,7 @@ import { format, parseISO } from 'date-fns';
 interface DataTableProps {
   data: Student[];
   onEdit: (student: Student) => void;
-  onDelete: (id: string) => voi
+  onDelete: (id: string) => void;
   onAddPlacement: (student: Student) => void;
 }
 
