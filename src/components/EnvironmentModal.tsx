@@ -7,7 +7,7 @@ import { Department, getDefaultDepartments } from '../utils/departmentUtils';
 interface EnvironmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-}
+
 
 const EnvironmentModal: React.FC<EnvironmentModalProps> = ({ isOpen, onClose }) => {
   const { createEnvironment } = useEnvironment();
