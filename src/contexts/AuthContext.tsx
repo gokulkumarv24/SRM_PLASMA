@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
-import { useEnvironment } from './EnvironmentContext';
+import { useEnvironment } from './EnvironmentContext
 import { useDepartments } from '../utils/departmentUtils';
 import { supabase, DatabaseMentor } from '../lib/supabase';
 
