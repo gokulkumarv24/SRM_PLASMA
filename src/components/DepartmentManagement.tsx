@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Department, useDepartments } from '../utils/departmentUtils';
 
 interface DepartmentModalProps {
-  isOpen: boolean;
+  isOpen: boolean
   onClose: () => void;
   onSave: (department: Omit<Department, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   department?: Department | null;
