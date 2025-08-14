@@ -303,7 +303,7 @@ const Dashboard: React.FC = () => {
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-xl font-bold text-gray-900">📥 Import Student Data</h2>
                       <button
-                        onClick={() => setIsUploadModalOpen(false)
+                        onClick={() => setIsUploadModalOpen(false)}
                         className="text-gray-400 hover:text-red-500 transition"
                         aria-label="Close"
                       >
