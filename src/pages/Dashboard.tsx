@@ -1,6 +1,6 @@
 // Dashboard.tsx
 
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { Plus, Download, Upload, Users, Building } from 'lucide-react';
 import Layout from '../components/Layout';
 import KPICards from '../components/KPICards';
