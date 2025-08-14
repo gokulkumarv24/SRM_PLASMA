@@ -306,7 +306,7 @@ const Dashboard: React.FC = () => {
                         onClick={() => setIsUploadModalOpen(false)}
                         className="text-gray-400 hover:text-red-500 transition"
                         aria-label="Close"
-                      >
+                      
                         <Plus className="h-6 w-6 rotate-45" />
                       </button>
                     </div>
